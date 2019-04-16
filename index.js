@@ -1,5 +1,5 @@
 const Axios = require("axios");
-const { AdBlockClient } = require("ad-block");
+const { FiltersEngine } = require("@cliqz/adblocker");
 const { writeFile, existsSync, mkdirSync } = require("fs");
 const { resolve } = require("path");
 const logUpdate = require("log-update");
@@ -10,37 +10,56 @@ if (!existsSync("output")) {
   mkdirSync("output");
 }
 
-for (const key in lists) {
-  console.log(`Downloading ${key}...`);
+const ops = [];
 
-  Axios.get(lists[key]).then(res => {
-    const { data } = res;
-    const client = new AdBlockClient();
+const startSpinner = text => {
+  const frames = ["-", "\\", "|", "/"];
+  let i = 0;
 
-    const lines = data.split("\n");
+  console.log("");
 
-    let progress = 0;
+  logUpdate(`${frames[0]} ${text}`);
 
-    let time = Date.now();
+  const interval = setInterval(() => {
+    const frame = frames[(i = ++i % frames.length)];
 
-    console.log("");
+    logUpdate(`${frame} ${text}`);
+  }, 80);
 
-    for (const line of lines) {
-      client.parse(line);
-      progress++;
-      if (Date.now() - time >= 500) {
-        logUpdate(`Parsing ${key}... ${progress}/${lines.length}`);
-        time = Date.now();
-      }
+  return {
+    stop: () => {
+      clearInterval(interval);
+      logUpdate(`Done!`);
     }
+  };
+};
 
-    console.log("");
-    console.log(`Serializing ${key}...`);
-    writeFile(resolve(`./output/${key}.dat`), client.serialize(64), err => {
-      if (err) console.error(err);
-    });
-    console.log("");
-    console.log(`Done generating ${key}`);
-    console.log("");
-  });
+let spinner = startSpinner("Downloading filters...");
+
+for (const key in lists) {
+  ops.push(Axios.get(lists[key]));
 }
+
+Axios.all(ops).then(res => {
+  let data = "";
+
+  for (const res1 of res) {
+    data += res1.data;
+  }
+
+  spinner.stop();
+
+  spinner = startSpinner("Parsing filters...");
+
+  const engine = FiltersEngine.parse(data);
+
+  spinner.stop();
+
+  spinner = startSpinner("Saving output...");
+
+  writeFile(resolve("output", "default.dat"), engine.serialize(), err => {
+    if (err) return console.error(err);
+
+    spinner.stop();
+  });
+});

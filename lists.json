@@ -1,4 +1,10 @@
 {
   "easylist": "https://easylist.to/easylist/easylist.txt",
-  "easyprivacy": "https://easylist.to/easylist/easyprivacy.txt"
+  "easyprivacy": "https://easylist.to/easylist/easyprivacy.txt",
+  "malwaredomains": "http://mirror1.malwaredomains.com/files/justdomains",
+  "nocoin": "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/nocoin.txt",
+  "ublock-filters": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+  "ublock-badware": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
+  "ublock-privacy": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
+  "ublock-unbreak": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt"
 }
